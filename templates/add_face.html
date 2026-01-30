@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="card card-lg">
+    <div class="card-header">
+        <h2>Add Face</h2>
+        <p class="subtitle">Upload images to register faces</p>
+    </div>
+
+    <form action="/ui/add-face" method="post" enctype="multipart/form-data" class="form">
+        <div class="form-group">
+            <label>Event Name</label>
+            <input type="text" name="event_id" placeholder="eg. wedding" required>
+            <small class="help-text">Use same name to group images</small>
+        </div>
+
+        <div class="form-group">
+            <label>Select Image</label>
+            <input type="file" name="file" accept="image/*" required onchange="previewImage(event)">
+        </div>
+
+        <div id="preview-box" class="preview hidden">
+            <!-- <span class="preview-title">Image Preview</span> -->
+            <img id="preview-img">
+        </div>
+        
+        <button class="btn primary btn-block" type="submit">
+            Upload Image
+        </button>
+    </form>
+</section>
+
+{% if success %}
+<section class="card">
+    <h3>Face Added Successfully</h3>
+
+    <div class="info-row">
+        <div class="info-box">
+            <span class="info-label">Person / Event</span>
+            <span class="info-value">{{ event_id }}</span>
+        </div>
+
+        <div class="info-box">
+            <span class="info-label">Faces Detected</span>
+            <span class="info-value">{{ faces_added }}</span>
+        </div>
+    </div>
+
+    <h4 class="section-title">📸 Uploaded Images</h4>
+
+    <div class="grid">
+        {% for img in gallery %}
+        <div class="image-card {% if img == image_url %}highlight{% endif %}">
+            <img src="{{ img }}">
+            {% if img == image_url %}
+            <span class="badge">New</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% if error %}
+<div class="alert alert-error">
+    {{ error }}
+</div>
+{% endif %}
+
+<script>
+function previewImage(event) {
+    const img = document.getElementById("preview-img");
+    const box = document.getElementById("preview-box");
+    img.src = URL.createObjectURL(event.target.files[0]);
+    box.classList.remove("hidden");
+}
+</script>
+
+{% endblock %}
