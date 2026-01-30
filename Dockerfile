@@ -1,6 +1,6 @@
-FROM python:3.10-slim
+FROM python:3.10.11-slim
 
-# Install system dependencies for building Python packages
+# System dependencies for OpenCV / ONNX / InsightFace
 RUN apt-get update && apt-get install -y \
     build-essential \
     g++ \
@@ -11,14 +11,19 @@ RUN apt-get update && apt-get install -y \
     libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python packages
+WORKDIR /app
+
+# Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir python-multipart
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir \
+        python-dotenv \
+        python-multipart \
+        jinja2
 
-
-# Install Jinja2 for FastAPI templates and Faiss for CPU
-RUN pip install --no-cache-dir jinja2 faiss-cpu
+# Copy app code
 COPY . .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Railway-compatible startup
+CMD uvicorn main:app --host 0.0.0.0 --port $PORT
